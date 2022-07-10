@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="${forge_version_range}"
+loaderVersion="[41,)"
 license="${license}"
 [[mods]]
 modId="${mod_id}"
