@@ -77,8 +77,7 @@ public class SpectreConfigTracker {
     SpectreConstants.LOG.debug(CONFIG, "Loading default configs");
     this.files.values().forEach(config -> {
       SpectreConstants.LOG.trace(CONFIG, "Loading config file type {} at {} for {}",
-          config.getType(),
-          config.getFileName(), config.getModId());
+          config.getType(), config.getFileName(), config.getModId());
       boolean alreadyExists =
           Files.exists(Services.CONFIG.getDefaultConfigPath().resolve(config.getFileName()));
       final CommentedFileConfig configData =
@@ -138,8 +137,15 @@ public class SpectreConfigTracker {
 
   private boolean setupConfigFile(final Path path, final ConfigFormat<?> conf) throws IOException {
     Files.createDirectories(path.getParent());
-    Files.createFile(path);
-    conf.initEmptyFile(path);
+    Path p = Services.CONFIG.getBackwardsCompatiblePath().resolve(path.getFileName());
+
+    if (Files.exists(p)) {
+      SpectreConstants.LOG.info(CONFIG, "Loading default config file from path {}", p);
+      Files.copy(p, path);
+    } else {
+      Files.createFile(path);
+      conf.initEmptyFile(path);
+    }
     return true;
   }
 

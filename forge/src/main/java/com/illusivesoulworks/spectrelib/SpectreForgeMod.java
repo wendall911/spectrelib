@@ -73,7 +73,7 @@ public class SpectreForgeMod {
   }
 
   private void onPlayerLoggedIn(final PlayerEvent.PlayerLoggedInEvent evt) {
-    Player player = evt.getPlayer();
+    Player player = evt.getEntity();
 
     if (player instanceof ServerPlayer serverPlayer) {
       List<FriendlyByteBuf> configData = SpectreConfigNetwork.getConfigSync();

@@ -32,13 +32,18 @@ public class FabricConfigHelper implements IConfigHelper {
   private static LevelResource SERVERCONFIG = null;
 
   @Override
-  public Path getDefaultConfigPath() {
+  public Path getBackwardsCompatiblePath() {
     return FabricLoader.getInstance().getGameDir().resolve("defaultconfigs");
   }
 
   @Override
-  public Path getLocalConfigPath() {
+  public Path getDefaultConfigPath() {
     return FabricLoader.getInstance().getConfigDir();
+  }
+
+  @Override
+  public Path getLocalConfigPath() {
+    return FabricLoader.getInstance().getGameDir().resolve("localconfigs");
   }
 
   @Override

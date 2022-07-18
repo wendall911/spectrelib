@@ -30,13 +30,18 @@ public class ForgeConfigHelper implements IConfigHelper {
   private static final LevelResource SERVERCONFIG = new LevelResource("serverconfig");
 
   @Override
-  public Path getDefaultConfigPath() {
+  public Path getBackwardsCompatiblePath() {
     return FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath());
   }
 
   @Override
-  public Path getLocalConfigPath() {
+  public Path getDefaultConfigPath() {
     return FMLPaths.CONFIGDIR.get();
+  }
+
+  @Override
+  public Path getLocalConfigPath() {
+    return FMLPaths.GAMEDIR.get().resolve("localconfigs");
   }
 
   @Override

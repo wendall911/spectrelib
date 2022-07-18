@@ -22,6 +22,8 @@ import net.minecraft.server.MinecraftServer;
 
 public interface IConfigHelper {
 
+  Path getBackwardsCompatiblePath();
+
   Path getDefaultConfigPath();
 
   Path getLocalConfigPath();
