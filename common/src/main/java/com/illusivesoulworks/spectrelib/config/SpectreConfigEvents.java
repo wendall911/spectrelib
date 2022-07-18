@@ -39,16 +39,22 @@ public class SpectreConfigEvents {
   private static void onLoadLocal() {
     Path path = Services.CONFIG.getLocalConfigPath();
 
-    try {
-      Files.createDirectory(path);
-    } catch (IOException e) {
+    if (!Files.isDirectory(path)) {
+      try {
+        Files.createDirectory(path);
+      } catch (IOException e) {
 
-      if (e instanceof FileAlreadyExistsException) {
-        SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG, "Failed to create {} directory due to an intervening file", path);
-      } else {
-        SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG, "Failed to create {} directory due to an unknown error", path, e);
+        if (e instanceof FileAlreadyExistsException) {
+          SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG,
+              "Failed to create {} directory due to an intervening file", path);
+        } else {
+          SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG,
+              "Failed to create {} directory due to an unknown error", path, e);
+        }
+        throw new RuntimeException("Failed to create directory", e);
       }
-      throw new RuntimeException("Failed to create directory", e);
+    } else {
+      SpectreConstants.LOG.debug(SpectreConfigLoader.CONFIG, "Found existing directory : {}", path);
     }
     SpectreConfigTracker.INSTANCE.loadConfigs(SpectreConfig.InstanceType.LOCAL,
         Services.CONFIG.getLocalConfigPath());
