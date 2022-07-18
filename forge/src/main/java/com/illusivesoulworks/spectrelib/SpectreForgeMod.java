@@ -52,8 +52,7 @@ public class SpectreForgeMod {
   }
 
   private void loadConfigs(final NewRegistryEvent evt) {
-    SpectreConfigEvents.onLoadDefault();
-    SpectreConfigEvents.onLoadLocal();
+    SpectreConfigEvents.onLoadDefaultAndLocal();
   }
 
   private void setup(final FMLCommonSetupEvent evt) {

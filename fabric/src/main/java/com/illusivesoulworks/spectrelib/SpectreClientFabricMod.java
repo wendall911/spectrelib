@@ -27,8 +27,7 @@ public class SpectreClientFabricMod implements ClientModInitializer {
 
   @Override
   public void onInitializeClient() {
-    SpectreConfigEvents.onLoadDefault();
-    SpectreConfigEvents.onLoadLocal();
+    SpectreConfigEvents.onLoadDefaultAndLocal();
     ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 
       if (!client.isLocalServer()) {
