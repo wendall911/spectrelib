@@ -360,6 +360,42 @@ public class SpectreConfigSpec {
       return new ConfigValue<>(this, path, defaultSupplier);
     }
 
+    public <T, I> TransformableValue<T, I> define(String path, Supplier<T> defaultSupplier,
+                                                  Predicate<Object> validator,
+                                                  Function<T, I> transformer) {
+      return define(split(path), defaultSupplier, validator, transformer);
+    }
+
+    public <T, I> TransformableValue<T, I> define(List<String> path, Supplier<T> defaultSupplier,
+                                                  Predicate<Object> validator,
+                                                  Function<T, I> transformer) {
+      return define(path, defaultSupplier, validator, Object.class, transformer);
+    }
+
+    public <T, I> TransformableValue<T, I> define(List<String> path, Supplier<T> defaultSupplier,
+                                                  Predicate<Object> validator, Class<?> clazz,
+                                                  Function<T, I> transformer) {
+      context.setClazz(clazz);
+      return define(path, new ValueSpec(defaultSupplier, validator, context), defaultSupplier,
+          transformer);
+    }
+
+    public <T, I> TransformableValue<T, I> define(List<String> path, ValueSpec value,
+                                                  Supplier<T> defaultSupplier,
+                                                  Function<T, I> transformer) {
+
+      if (!currentPath.isEmpty()) {
+        List<String> tmp = new ArrayList<>(currentPath.size() + path.size());
+        tmp.addAll(currentPath);
+        tmp.addAll(path);
+        path = tmp;
+      }
+      storage.set(path, value);
+      checkComment(path);
+      context = new BuilderContext();
+      return new TransformableValue<>(this, path, defaultSupplier, transformer);
+    }
+
     public <V extends Comparable<? super V>> ConfigValue<V> defineInRange(String path,
                                                                           V defaultValue, V min,
                                                                           V max, Class<V> clazz) {
@@ -482,6 +518,83 @@ public class SpectreConfigSpec {
           return list;
         }
       }, defaultSupplier);
+    }
+
+    public <T, I> TransformableValue<List<? extends T>, I> defineList(String path,
+                                                                      List<? extends T> defaultValue,
+                                                                      Predicate<Object> elementValidator,
+                                                                      Function<List<? extends T>, I> transformer) {
+      return defineList(split(path), defaultValue, elementValidator, transformer);
+    }
+
+    public <T, I> TransformableValue<List<? extends T>, I> defineList(String path,
+                                                                      Supplier<List<? extends T>> defaultSupplier,
+                                                                      Predicate<Object> elementValidator,
+                                                                      Function<List<? extends T>, I> transformer) {
+      return defineList(split(path), defaultSupplier, elementValidator, transformer);
+    }
+
+    public <T, I> TransformableValue<List<? extends T>, I> defineList(List<String> path,
+                                                                      List<? extends T> defaultValue,
+                                                                      Predicate<Object> elementValidator,
+                                                                      Function<List<? extends T>, I> transformer) {
+      return defineList(path, () -> defaultValue, elementValidator, transformer);
+    }
+
+    public <T, I> TransformableValue<List<? extends T>, I> defineList(List<String> path,
+                                                                      Supplier<List<? extends T>> defaultSupplier,
+                                                                      Predicate<Object> elementValidator,
+                                                                      Function<List<? extends T>, I> transformer) {
+      context.setClazz(List.class);
+      return define(path, new ValueSpec(defaultSupplier,
+          x -> x instanceof List && ((List<?>) x).stream().allMatch(elementValidator), context) {
+        @Override
+        public Object correct(Object value) {
+          if (!(value instanceof List) || ((List<?>) value).isEmpty()) {
+            SpectreConstants.LOG.debug(CONFIG,
+                "List on key {} is deemed to need correction. It is null, not a list, or an empty list. Modders, consider defineListAllowEmpty?",
+                path.get(path.size() - 1));
+            return getDefault();
+          }
+          List<?> list = Lists.newArrayList((List<?>) value);
+          list.removeIf(elementValidator.negate());
+          if (list.isEmpty()) {
+            SpectreConstants.LOG.debug(CONFIG,
+                "List on key {} is deemed to need correction. It failed validation.",
+                path.get(path.size() - 1));
+            return getDefault();
+          }
+          return list;
+        }
+      }, defaultSupplier, transformer);
+    }
+
+    public <T, I> TransformableValue<List<? extends T>, I> defineListAllowEmpty(List<String> path,
+                                                                                Supplier<List<? extends T>> defaultSupplier,
+                                                                                Predicate<Object> elementValidator,
+                                                                                Function<List<? extends T>, I> transformer) {
+      context.setClazz(List.class);
+      return define(path, new ValueSpec(defaultSupplier,
+          x -> x instanceof List && ((List<?>) x).stream().allMatch(elementValidator), context) {
+        @Override
+        public Object correct(Object value) {
+          if (!(value instanceof List)) {
+            SpectreConstants.LOG.debug(CONFIG,
+                "List on key {} is deemed to need correction, as it is null or not a list.",
+                path.get(path.size() - 1));
+            return getDefault();
+          }
+          List<?> list = Lists.newArrayList((List<?>) value);
+          list.removeIf(elementValidator.negate());
+          if (list.isEmpty()) {
+            SpectreConstants.LOG.debug(CONFIG,
+                "List on key {} is deemed to need correction. It failed validation.",
+                path.get(path.size() - 1));
+            return getDefault();
+          }
+          return list;
+        }
+      }, defaultSupplier, transformer);
     }
 
     //Enum
