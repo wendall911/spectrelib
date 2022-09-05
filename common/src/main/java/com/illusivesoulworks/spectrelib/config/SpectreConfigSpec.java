@@ -107,7 +107,8 @@ public class SpectreConfigSpec {
               configData.toString();
 
       if (shouldLog) {
-        SpectreConstants.LOG.warn(CONFIG, "Configuration file {} is not correct. Correcting", configName);
+        SpectreConstants.LOG.warn(CONFIG, "Configuration file {} is not correct. Correcting",
+            configName);
       }
       correct(configData,
           (action, path, incorrectValue, correctedValue) -> {
@@ -950,7 +951,8 @@ public class SpectreConfigSpec {
       boolean result = c.compareTo(min) >= 0 && c.compareTo(max) <= 0;
 
       if (!result) {
-        SpectreConstants.LOG.debug(CONFIG, "Range value {} is not within its bounds {}-{}", c, min, max);
+        SpectreConstants.LOG.debug(CONFIG, "Range value {} is not within its bounds {}-{}", c, min,
+            max);
       }
       return result;
     }
@@ -1107,6 +1109,33 @@ public class SpectreConfigSpec {
 
     public void clearCache() {
       this.cachedValue = null;
+    }
+  }
+
+  public static class TransformableValue<T, I> extends ConfigValue<T> {
+
+    private final Function<T, I> transformer;
+
+    private I transformedValue = null;
+
+    TransformableValue(Builder parent, List<String> path, Supplier<T> defaultSupplier,
+                       Function<T, I> transformer) {
+      super(parent, path, defaultSupplier);
+      this.transformer = transformer;
+    }
+
+    public I getTransformed() {
+      T val = this.get();
+
+      if (transformedValue == null) {
+        transformedValue = transformer.apply(val);
+      }
+      return transformedValue;
+    }
+
+    public void clearCache() {
+      super.clearCache();
+      transformedValue = null;
     }
   }
 
