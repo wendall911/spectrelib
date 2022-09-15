@@ -17,12 +17,6 @@
 
 package com.illusivesoulworks.spectrelib.config;
 
-import com.illusivesoulworks.spectrelib.SpectreConstants;
-import com.illusivesoulworks.spectrelib.platform.Services;
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import net.minecraft.server.MinecraftServer;
 
 public class SpectreConfigEvents {
@@ -37,32 +31,11 @@ public class SpectreConfigEvents {
   }
 
   private static void onLoadLocal() {
-    Path path = Services.CONFIG.getLocalConfigPath();
-
-    if (!Files.isDirectory(path)) {
-      try {
-        Files.createDirectory(path);
-      } catch (IOException e) {
-
-        if (e instanceof FileAlreadyExistsException) {
-          SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG,
-              "Failed to create {} directory due to an intervening file", path);
-        } else {
-          SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG,
-              "Failed to create {} directory due to an unknown error", path, e);
-        }
-        throw new RuntimeException("Failed to create directory", e);
-      }
-    } else {
-      SpectreConstants.LOG.debug(SpectreConfigLoader.CONFIG, "Found existing directory : {}", path);
-    }
-    SpectreConfigTracker.INSTANCE.loadConfigs(SpectreConfig.InstanceType.LOCAL,
-        Services.CONFIG.getLocalConfigPath());
+    SpectreConfigTracker.INSTANCE.loadLocalConfigs();
   }
 
   public static void onLoadServer(final MinecraftServer server) {
-    SpectreConfigTracker.INSTANCE.loadConfigs(SpectreConfig.InstanceType.SERVER,
-        Services.CONFIG.getServerConfigPath(server));
+    SpectreConfigTracker.INSTANCE.loadServerConfigs(server);
   }
 
   public static void onUnloadServer() {

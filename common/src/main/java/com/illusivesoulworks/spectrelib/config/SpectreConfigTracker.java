@@ -29,6 +29,7 @@ import com.illusivesoulworks.spectrelib.SpectreConstants;
 import com.illusivesoulworks.spectrelib.platform.Services;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -39,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.server.MinecraftServer;
 
 public class SpectreConfigTracker {
 
@@ -89,15 +91,73 @@ public class SpectreConfigTracker {
     });
   }
 
-  void loadConfigs(SpectreConfig.InstanceType type, Path configDir) {
-    SpectreConstants.LOG.debug(CONFIG, "Loading {} configs from {}", type.id(), configDir);
+  void loadLocalConfigs() {
+    Path path = Services.CONFIG.getLocalConfigPath();
+
+    if (!Files.isDirectory(path)) {
+      try {
+        Files.createDirectory(path);
+      } catch (IOException e) {
+
+        if (e instanceof FileAlreadyExistsException) {
+          SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG,
+              "Failed to create {} directory due to an intervening file", path);
+        } else {
+          SpectreConstants.LOG.error(SpectreConfigLoader.CONFIG,
+              "Failed to create {} directory due to an unknown error", path, e);
+        }
+        throw new RuntimeException("Failed to create directory", e);
+      }
+    } else {
+      SpectreConstants.LOG.debug(SpectreConfigLoader.CONFIG, "Found existing directory : {}", path);
+    }
+    SpectreConfig.InstanceType type = SpectreConfig.InstanceType.LOCAL;
+    SpectreConstants.LOG.debug(CONFIG, "Loading {} configs from {}", type.id(), path);
     this.files.values().forEach(config -> {
-      Path configPath = configDir.resolve(config.getFileName());
+      Path configPath = path.resolve(config.getFileName());
 
       if (Files.exists(configPath)) {
         SpectreConstants.LOG.trace(CONFIG, "Loading config file type {} at {} from {} for {}",
-            config.getType(), config.getFileName(), configDir, config.getModId());
-        final CommentedFileConfig configData = read(configDir).apply(config);
+            config.getType(), config.getFileName(), path, config.getModId());
+        final CommentedFileConfig configData = read(path).apply(config);
+        config.setConfigData(type, configData, false);
+        config.fireLoad();
+        config.save(type);
+      }
+    });
+  }
+
+  void loadServerConfigs(MinecraftServer server) {
+    Path configDir = Services.CONFIG.getServerConfigPath(server);
+    SpectreConfig.InstanceType type = SpectreConfig.InstanceType.SERVER;
+    SpectreConstants.LOG.debug(CONFIG, "Loading {} configs from {}", type.id(), configDir);
+    this.files.values().forEach(config -> {
+      Path dir = null;
+      String name = config.getFileName();
+      Path configPath = configDir.resolve(name);
+
+      if (Files.exists(configPath)) {
+        dir = configDir;
+      } else {
+        Path localDir = Services.CONFIG.getLocalConfigPath();
+        Path localPath = localDir.resolve(name);
+
+        if (Files.exists(localPath)) {
+          dir = localDir;
+        } else {
+          Path defaultDir = Services.CONFIG.getDefaultConfigPath();
+          Path defaultPath = defaultDir.resolve(name);
+
+          if (Files.exists(defaultPath)) {
+            dir = defaultDir;
+          }
+        }
+      }
+
+      if (dir != null) {
+        SpectreConstants.LOG.trace(CONFIG, "Loading config file type {} at {} from {} for {}",
+            config.getType(), config.getFileName(), dir, config.getModId());
+        final CommentedFileConfig configData = read(dir).apply(config);
         config.setConfigData(type, configData, false);
         config.fireLoad();
         config.save(type);
