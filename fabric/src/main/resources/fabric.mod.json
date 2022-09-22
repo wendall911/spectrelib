@@ -18,6 +18,9 @@
       ],
       "server": [
         "com.illusivesoulworks.spectrelib.SpectreFabricMod"
+      ],
+      "preLaunch": [
+        "com.illusivesoulworks.spectrelib.SpectrePreLaunchFabricMod"
       ]
     },
     "mixins": [

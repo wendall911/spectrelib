@@ -18,10 +18,15 @@
 package com.illusivesoulworks.spectrelib;
 
 import com.illusivesoulworks.spectrelib.config.SpectreConfigEvents;
+import com.illusivesoulworks.spectrelib.config.SpectreConfigInitializer;
 import com.illusivesoulworks.spectrelib.config.SpectreConfigNetwork;
+import com.illusivesoulworks.spectrelib.platform.FabricConfigHelper;
+import java.io.File;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.impl.entrypoint.EntrypointUtils;
+import net.minecraft.client.main.GameConfig;
 
 public class SpectreClientFabricMod implements ClientModInitializer {
 
@@ -39,5 +44,17 @@ public class SpectreClientFabricMod implements ClientModInitializer {
           buf.retain();
           client.execute(() -> SpectreConfigNetwork.handleConfigSync(buf));
         });
+  }
+
+  public static void prepareConfigs(GameConfig gameConfig) {
+    File file = gameConfig.location.gameDirectory;
+
+    if (file == null) {
+      file = new File(".");
+    }
+    FabricConfigHelper.gameDir = file.toPath();
+    EntrypointUtils.invoke("spectrelib", SpectreConfigInitializer.class,
+        SpectreConfigInitializer::onInitialize);
+    SpectreConfigEvents.onLoadDefaultAndLocal();
   }
 }

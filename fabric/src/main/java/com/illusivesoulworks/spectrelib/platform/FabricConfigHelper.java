@@ -20,30 +20,32 @@ package com.illusivesoulworks.spectrelib.platform;
 import com.illusivesoulworks.spectrelib.SpectreConstants;
 import com.illusivesoulworks.spectrelib.mixin.SpectreLibMixinLevelResource;
 import com.illusivesoulworks.spectrelib.platform.services.IConfigHelper;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
 public class FabricConfigHelper implements IConfigHelper {
 
+  public static Path gameDir = new File(".").toPath();
+
   private static LevelResource SERVERCONFIG = null;
 
   @Override
   public Path getBackwardsCompatiblePath() {
-    return FabricLoader.getInstance().getGameDir().resolve("defaultconfigs");
+    return gameDir.resolve("defaultconfigs");
   }
 
   @Override
   public Path getDefaultConfigPath() {
-    return FabricLoader.getInstance().getConfigDir();
+    return gameDir.resolve("config");
   }
 
   @Override
   public Path getLocalConfigPath() {
-    return FabricLoader.getInstance().getGameDir().resolve("localconfigs");
+    return gameDir.resolve("localconfigs");
   }
 
   @Override
