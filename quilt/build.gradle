@@ -1,10 +1,27 @@
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'org.quiltmc.loom' version '1.0-SNAPSHOT'
     id 'maven-publish'
     id 'idea'
 }
 
-archivesBaseName = "${mod_id}-fabric"
+archivesBaseName = "${mod_id}-quilt"
+
+repositories {
+
+    maven {
+        name 'Quilt (Release)'
+        url 'https://maven.quiltmc.org/repository/release/'
+    }
+
+    maven {
+        name 'Quilt (Snapshot)'
+        url 'https://maven.quiltmc.org/repository/snapshot/'
+        content {
+            includeGroup 'org.quiltmc.fabric_api_qsl'
+            includeGroupByRegex 'org\\.quiltmc\\.qsl(?:\\.[a-z_]+)?'
+        }
+    }
+}
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
@@ -12,13 +29,16 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${parchment_mc_version}:${parchment_version}@zip")
     })
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-    implementation project(":common")
+    modImplementation "org.quiltmc:quilt-loader:${quilt_loader_version}"
+    modImplementation("org.quiltmc:qsl:${quilt_stdlib_version}") {
+        exclude group: "net.fabricmc"
+    }
 
     implementation group: 'com.electronwill.night-config', name: 'core', version: '3.6.5'
     implementation group: 'com.electronwill.night-config', name: 'toml', version: '3.6.5'
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    implementation project(":common")
+
     include group: 'com.electronwill.night-config', name: 'core', version: '3.6.5'
     include group: 'com.electronwill.night-config', name: 'toml', version: '3.6.5'
 }
@@ -27,13 +47,13 @@ loom {
     runs {
         client {
             client()
-            setConfigName("Fabric Client")
+            setConfigName("Quilt Client")
             ideConfigGenerated(true)
             runDir("run")
         }
         server {
             server()
-            setConfigName("Fabric Server")
+            setConfigName("Quilt Server")
             ideConfigGenerated(true)
             runDir("run")
         }
@@ -52,8 +72,8 @@ processResources {
     from project(":common").sourceSets.main.resources
     inputs.property "version", project.version
 
-    filesMatching("fabric.mod.json") {
-        expand 'version': project.version, 'fabric_mc_version_range': project.fabric_mc_version_range, 'license': project.license,
+    filesMatching("quilt.mod.json") {
+        expand 'version': project.version, 'quilt_mc_version_range': project.quilt_mc_version_range, 'license': project.license,
                 'mod_id': project.mod_id, 'mod_author': project.mod_author, 'mod_description': project.mod_description,
                 'mod_name': project.mod_name
     }
@@ -66,6 +86,7 @@ processResources {
 tasks.withType(JavaCompile) {
     source(project(":common").sourceSets.main.allSource)
 }
+
 
 publishing {
     publications {

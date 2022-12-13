@@ -21,33 +21,32 @@ import com.illusivesoulworks.spectrelib.config.SpectreConfigEvents;
 import com.illusivesoulworks.spectrelib.config.SpectreConfigNetwork;
 import io.netty.buffer.Unpooled;
 import java.util.List;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import org.quiltmc.loader.api.ModContainer;
+import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
+import org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents;
+import org.quiltmc.qsl.networking.api.ServerPlayConnectionEvents;
+import org.quiltmc.qsl.networking.api.ServerPlayNetworking;
 
-public class SpectreFabricMod implements ModInitializer {
+public class SpectreQuiltMod implements ModInitializer {
 
   public static final ResourceLocation CONFIG_SYNC =
       new ResourceLocation(SpectreConstants.MOD_ID, "config_sync");
 
   @Override
-  public void onInitialize() {
-    ServerLifecycleEvents.SERVER_STARTING.register(SpectreConfigEvents::onLoadServer);
-    ServerLifecycleEvents.SERVER_STOPPED.register(server -> SpectreConfigEvents.onUnloadServer());
+  public void onInitialize(ModContainer modContainer) {
+    ServerLifecycleEvents.STARTING.register(SpectreConfigEvents::onLoadServer);
+    ServerLifecycleEvents.STOPPED.register(server -> SpectreConfigEvents.onUnloadServer());
     ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
       ServerPlayer serverPlayer = handler.getPlayer();
       List<FriendlyByteBuf> configData = SpectreConfigNetwork.getConfigSync();
 
       for (FriendlyByteBuf configDatum : configData) {
-        ServerPlayNetworking.send(serverPlayer, SpectreFabricMod.CONFIG_SYNC,
-            configDatum);
+        ServerPlayNetworking.send(serverPlayer, CONFIG_SYNC, configDatum);
       }
-      ServerPlayNetworking.send(serverPlayer, SpectreFabricMod.CONFIG_SYNC,
-          new FriendlyByteBuf(Unpooled.buffer()));
+      ServerPlayNetworking.send(serverPlayer, CONFIG_SYNC, new FriendlyByteBuf(Unpooled.buffer()));
     });
   }
 }
