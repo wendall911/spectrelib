@@ -55,7 +55,7 @@ public class SpectreClientFabricMod implements ClientModInitializer {
     }
     FabricConfigHelper.gameDir = file.toPath();
     EntrypointUtils.invoke("spectrelib", SpectreConfigInitializer.class,
-        SpectreConfigInitializer::onInitialize);
+        SpectreConfigInitializer::onInitializeConfig);
     SpectreConfigEvents.onLoadDefaultAndLocal();
   }
 }

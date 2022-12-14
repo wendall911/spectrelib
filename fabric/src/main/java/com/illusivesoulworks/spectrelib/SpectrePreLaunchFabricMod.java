@@ -31,7 +31,7 @@ public class SpectrePreLaunchFabricMod implements PreLaunchEntrypoint {
 
     if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
       EntrypointUtils.invoke("spectrelib", SpectreConfigInitializer.class,
-          SpectreConfigInitializer::onInitialize);
+          SpectreConfigInitializer::onInitializeConfig);
       SpectreConfigEvents.onLoadDefaultAndLocal();
     }
   }

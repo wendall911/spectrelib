@@ -19,5 +19,10 @@ package com.illusivesoulworks.spectrelib.config;
 
 public interface SpectreConfigInitializer {
 
+  @Deprecated
   void onInitialize();
+
+  default void onInitializeConfig() {
+    onInitialize();
+  }
 }
