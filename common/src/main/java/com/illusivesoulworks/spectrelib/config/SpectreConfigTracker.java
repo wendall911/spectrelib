@@ -22,9 +22,11 @@ import static com.illusivesoulworks.spectrelib.config.SpectreConfigLoader.CONFIG
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigFormat;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.core.io.ParsingException;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.electronwill.nightconfig.toml.TomlFormat;
+import com.google.common.collect.ImmutableMap;
 import com.illusivesoulworks.spectrelib.SpectreConstants;
 import com.illusivesoulworks.spectrelib.platform.Services;
 import java.io.ByteArrayInputStream;
@@ -51,6 +53,7 @@ public class SpectreConfigTracker {
       new EnumMap<>(SpectreConfig.Type.class);
   private final ConcurrentHashMap<String, Map<SpectreConfig.Type, Set<SpectreConfig>>>
       configsByMod = new ConcurrentHashMap<>();
+  private final Map<String, Map<String, Object>> defaultConfigs = new ConcurrentHashMap<>();
 
   private SpectreConfigTracker() {
 
@@ -175,21 +178,64 @@ public class SpectreConfigTracker {
     });
   }
 
+  static void tryConfigFileLoad(FileConfig configData) {
+    try {
+      configData.load();
+    } catch (ParsingException e) {
+      try {
+        Files.delete(configData.getNioPath());
+        configData.load();
+        SpectreConstants.LOG.warn("Configuration file {} could not be parsed. Correcting",
+            configData.getNioPath());
+        return;
+      } catch (Throwable t) {
+        e.addSuppressed(t);
+      }
+      throw e;
+    }
+  }
+
+  private void tryDefaultConfigLoad(SpectreConfig modConfig) {
+    String fileName = modConfig.getFileName();
+    Path path = Services.CONFIG.getDefaultConfigPath().resolve(fileName);
+
+    if (Files.exists(path)) {
+
+      try (CommentedFileConfig config = CommentedFileConfig.of(path)) {
+        config.load();
+        Map<String, Object> values = config.valueMap();
+
+        if (values != null && !values.isEmpty()) {
+          this.defaultConfigs.put(fileName.intern(), ImmutableMap.copyOf(values));
+        }
+        SpectreConstants.LOG.info(CONFIG, "Loaded default config values from file at path {}",
+            path);
+      } catch (Exception e) {
+        SpectreConstants.LOG.error(CONFIG,
+            "Error loading default config values from file at path {}", path);
+        e.printStackTrace();
+      }
+    }
+  }
+
   Function<SpectreConfig, CommentedFileConfig> read(Path basePath) {
     return (config) -> {
       final Path configPath = basePath.resolve(config.getFileName());
-      final CommentedFileConfig configData = CommentedFileConfig.builder(configPath).sync().
-          preserveInsertionOrder().
-          autosave().
-          onFileNotFound(this::setupConfigFile).
-          writingMode(WritingMode.REPLACE).
-          build();
+      final CommentedFileConfig configData =
+          CommentedFileConfig.builder(configPath, TomlFormat.instance()).sync().
+              preserveInsertionOrder().
+              autosave().
+              onFileNotFound(this::setupConfigFile).
+              writingMode(WritingMode.REPLACE).
+              build();
       SpectreConstants.LOG.debug(CONFIG, "Built TOML config for {}", configPath);
       try {
-        configData.load();
-      } catch (ParsingException e) {
-        throw new ConfigLoadingException(config, e);
+        tryConfigFileLoad(configData);
+      } catch (ParsingException ex) {
+        SpectreConstants.LOG.error(CONFIG, "Error loading TOML config for {}", configPath);
+        throw new ConfigLoadingException(config, ex);
       }
+      this.tryDefaultConfigLoad(config);
       SpectreConstants.LOG.debug(CONFIG, "Loaded TOML config file {}", configPath);
       return configData;
     };
@@ -207,6 +253,10 @@ public class SpectreConfigTracker {
       conf.initEmptyFile(path);
     }
     return true;
+  }
+
+  public Map<String, Map<String, Object>> getDefaultConfigs() {
+    return ImmutableMap.copyOf(this.defaultConfigs);
   }
 
   public void acceptSyncedConfigs(String fileName, byte[] data) {

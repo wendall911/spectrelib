@@ -193,6 +193,14 @@ public class SpectreConfigSpec {
     int count = 0;
     Map<String, Object> specMap = spec.valueMap();
     Map<String, Object> configMap = config.valueMap();
+    final Map<String, Object> defaultMap;
+
+    if (config instanceof FileConfig fileConfig) {
+      defaultMap = SpectreConfigTracker.INSTANCE.getDefaultConfigs()
+          .get(fileConfig.getNioPath().getFileName().toString().intern());
+    } else {
+      defaultMap = null;
+    }
 
     for (Map.Entry<String, Object> specEntry : specMap.entrySet()) {
       final String key = specEntry.getKey();
@@ -243,7 +251,17 @@ public class SpectreConfigSpec {
           if (dryRun) {
             return 1;
           }
-          Object newValue = valueSpec.correct(configValue);
+          Object newValue;
+
+          if (defaultMap != null && defaultMap.containsKey(key)) {
+            newValue = defaultMap.get(key);
+
+            if (!valueSpec.test(newValue)) {
+              newValue = valueSpec.correct(configValue);
+            }
+          } else {
+            newValue = valueSpec.correct(configValue);
+          }
           configMap.put(key, newValue);
           listener.onCorrect(action, parentPathUnmodifiable, configValue, newValue);
           count++;
