@@ -197,7 +197,7 @@ public class SpectreConfigTracker {
 
   private void tryDefaultConfigLoad(SpectreConfig modConfig) {
     String fileName = modConfig.getFileName();
-    Path path = Services.CONFIG.getDefaultConfigPath().resolve(fileName);
+    Path path = Services.CONFIG.getBackwardsCompatiblePath().resolve(fileName);
 
     if (Files.exists(path)) {
 
