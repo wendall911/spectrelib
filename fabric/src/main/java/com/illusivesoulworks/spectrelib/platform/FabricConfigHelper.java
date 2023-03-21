@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
@@ -65,5 +67,10 @@ public class FabricConfigHelper implements IConfigHelper {
       }
     }
     return serverConfig;
+  }
+
+  @Override
+  public boolean isDedicatedServer() {
+    return FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER;
   }
 }

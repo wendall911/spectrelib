@@ -29,4 +29,6 @@ public interface IConfigHelper {
   Path getLocalConfigPath();
 
   Path getServerConfigPath(final MinecraftServer server);
+
+  boolean isDedicatedServer();
 }

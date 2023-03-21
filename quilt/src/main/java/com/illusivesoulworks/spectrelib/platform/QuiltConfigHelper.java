@@ -24,8 +24,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import net.fabricmc.api.EnvType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
+import org.quiltmc.loader.impl.launch.common.QuiltLauncherBase;
 
 public class QuiltConfigHelper implements IConfigHelper {
 
@@ -65,5 +67,10 @@ public class QuiltConfigHelper implements IConfigHelper {
       }
     }
     return serverConfig;
+  }
+
+  @Override
+  public boolean isDedicatedServer() {
+    return QuiltLauncherBase.getLauncher().getEnvironmentType() == EnvType.SERVER;
   }
 }

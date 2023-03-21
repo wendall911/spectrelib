@@ -64,6 +64,9 @@ public class SpectreConfigTracker {
 
   void track(final SpectreConfig config) {
 
+    if (config.getType() == SpectreConfig.Type.CLIENT && Services.CONFIG.isDedicatedServer()) {
+      return;
+    }
     if (this.files.containsKey(config.getFileName())) {
       SpectreConstants.LOG.error(CONFIG, "Detected config file conflict {} between {} and {}",
           config.getFileName(), this.files.get(config.getFileName()).getModId(), config.getModId());

@@ -21,7 +21,10 @@ import com.illusivesoulworks.spectrelib.platform.services.IConfigHelper;
 import java.nio.file.Path;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
 
@@ -49,5 +52,10 @@ public class ForgeConfigHelper implements IConfigHelper {
     final Path serverConfig = server.getWorldPath(SERVERCONFIG);
     FileUtils.getOrCreateDirectory(serverConfig, "serverconfig");
     return serverConfig;
+  }
+
+  @Override
+  public boolean isDedicatedServer() {
+    return FMLLoader.getDist() == Dist.DEDICATED_SERVER;
   }
 }
