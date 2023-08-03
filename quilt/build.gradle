@@ -112,5 +112,11 @@ publishing {
                 }
             }
         }
+
+        if (project.hasProperty('localmaven')) {
+            maven {
+                url "file://" + localmaven
+            }
+        }
     }
 }
