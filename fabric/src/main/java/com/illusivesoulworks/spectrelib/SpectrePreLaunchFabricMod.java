@@ -22,15 +22,15 @@ import com.illusivesoulworks.spectrelib.config.SpectreConfigInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
-import net.fabricmc.loader.impl.entrypoint.EntrypointUtils;
 
 public class SpectrePreLaunchFabricMod implements PreLaunchEntrypoint {
 
   @Override
   public void onPreLaunch() {
+    FabricLoader loader = FabricLoader.getInstance();
 
-    if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
-      EntrypointUtils.invoke("spectrelib", SpectreConfigInitializer.class,
+    if (loader.getEnvironmentType() == EnvType.SERVER) {
+      loader.invokeEntrypoints("spectrelib", SpectreConfigInitializer.class,
           SpectreConfigInitializer::onInitializeConfig);
       SpectreConfigEvents.onLoadDefaultAndLocal();
     }
