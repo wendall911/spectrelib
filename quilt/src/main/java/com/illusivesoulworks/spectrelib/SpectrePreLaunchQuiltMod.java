@@ -23,7 +23,6 @@ import net.fabricmc.api.EnvType;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.quiltmc.loader.api.minecraft.MinecraftQuiltLoader;
-import org.quiltmc.loader.impl.entrypoint.EntrypointUtils;
 
 public class SpectrePreLaunchQuiltMod implements PreLaunchEntrypoint {
 

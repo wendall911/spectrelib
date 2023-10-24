@@ -24,7 +24,6 @@ import com.illusivesoulworks.spectrelib.platform.QuiltConfigHelper;
 import java.io.File;
 import net.minecraft.client.main.GameConfig;
 import org.quiltmc.loader.api.ModContainer;
-import org.quiltmc.loader.impl.entrypoint.EntrypointUtils;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 import org.quiltmc.qsl.networking.api.client.ClientPlayConnectionEvents;
 import org.quiltmc.qsl.networking.api.client.ClientPlayNetworking;
