@@ -25,7 +25,6 @@ import java.io.File;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.main.GameConfig;
 
 public class SpectreClientFabricMod implements ClientModInitializer {
@@ -54,7 +53,7 @@ public class SpectreClientFabricMod implements ClientModInitializer {
       file = new File(".");
     }
     FabricConfigHelper.gameDir = file.toPath();
-    FabricLoader.getInstance().invokeEntrypoints("spectrelib", SpectreConfigInitializer.class,
+    EntrypointUtils.invokeEntrypoints("spectrelib", SpectreConfigInitializer.class,
         SpectreConfigInitializer::onInitializeConfig);
     SpectreConfigEvents.onLoadDefaultAndLocal();
   }
