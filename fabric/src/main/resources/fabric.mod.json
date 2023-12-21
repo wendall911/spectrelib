@@ -1,36 +1,49 @@
 {
-    "schemaVersion": 1,
-    "id": "${mod_id}",
-    "version": "${version}",
-    "name": "${mod_name}",
-    "description": "${mod_description}",
-    "authors": [
-      "${mod_author}"
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "icon": "${mod_id}_icon.png",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contact": {
+    "homepage": "${source}",
+    "issues": "${issues}",
+    "sources": "${source}"
+  },
+  "license": "${license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.illusivesoulworks.spectrelib.SpectreFabricMod"
     ],
-    "license": "${license}",
-    "environment": "*",
-    "entrypoints": {
-      "main": [
-        "com.illusivesoulworks.spectrelib.SpectreFabricMod"
-      ],
-      "client": [
-        "com.illusivesoulworks.spectrelib.SpectreClientFabricMod"
-      ],
-      "server": [
-        "com.illusivesoulworks.spectrelib.SpectreFabricMod"
-      ],
-      "preLaunch": [
-        "com.illusivesoulworks.spectrelib.SpectrePreLaunchFabricMod"
+    "client": [
+      "com.illusivesoulworks.spectrelib.SpectreClientFabricMod"
+    ],
+    "server": [
+      "com.illusivesoulworks.spectrelib.SpectreFabricMod"
+    ],
+    "preLaunch": [
+      "com.illusivesoulworks.spectrelib.SpectrePreLaunchFabricMod"
+    ]
+  },
+  "custom": {
+    "modmenu": {
+      "badges": [
+        "library"
       ]
-    },
-    "mixins": [
-      "spectrelib.mixins.json"
-    ],
-    "depends": {
-      "fabricloader": ">=0.14",
-      "fabric": "*",
-      "minecraft": "${fabric_mc_version_range}",
-      "java": ">=17"
     }
+  },
+  "mixins": [
+    "spectrelib.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14",
+    "fabric": "*",
+    "minecraft": "${fabric_mc_version_range}",
+    "java": ">=17"
   }
+}
   

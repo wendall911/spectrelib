@@ -94,7 +94,7 @@ def replaceResources = tasks.register("replaceResources", Copy) {
         include "META-INF/mods.toml"
         expand 'version': version, 'forge_mc_version_range': forge_mc_version_range, 'forge_version_range': forge_version_range,
                 'license': license, 'mod_id': mod_id, 'mod_author': mod_author, 'mod_description': mod_description,
-                'mod_name': mod_name
+                'mod_name': mod_name, 'issues': issues, 'source': project.source
     }
     it.from(project(":common").sourceSets.main.resources) {
         include "pack.mcmeta"

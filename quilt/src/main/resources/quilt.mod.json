@@ -40,8 +40,19 @@
       "contributors": {
         "${mod_author}": "Owner"
       },
-      "license": "${license}"
+      "license": "${license}",
+      "contact": {
+        "homepage": "${source}",
+        "issues": "${issues}",
+        "sources": "${source}"
+      },
+      "icon": "${mod_id}_icon.png"
     }
+  },
+  "modmenu": {
+    "badges": [
+      "library"
+    ]
   },
   "mixin": [
     "spectrelib.mixins.json"
