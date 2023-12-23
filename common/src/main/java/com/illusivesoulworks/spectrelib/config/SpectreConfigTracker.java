@@ -43,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.server.MinecraftServer;
+import org.apache.commons.io.FilenameUtils;
 
 public class SpectreConfigTracker {
 
@@ -186,15 +187,36 @@ public class SpectreConfigTracker {
       configData.load();
     } catch (ParsingException e) {
       try {
-        Files.delete(configData.getNioPath());
+        Path path = configData.getNioPath();
+        SpectreConstants.LOG.warn(CONFIG,
+            "Configuration file {} could not be parsed. Creating backup file and correcting", path);
+
+        if (Files.exists(path)) {
+          createBackup(path);
+        }
+        Files.delete(path);
         configData.load();
-        SpectreConstants.LOG.warn("Configuration file {} could not be parsed. Correcting",
-            configData.getNioPath());
         return;
       } catch (Throwable t) {
         e.addSuppressed(t);
       }
       throw e;
+    }
+  }
+
+  private static void createBackup(Path commentedFileConfig) {
+    Path path = commentedFileConfig.getParent();
+    String name = commentedFileConfig.getFileName().toString();
+    String fileName = FilenameUtils.removeExtension(name);
+    String extension = FilenameUtils.getExtension(name) + ".bak";
+    Path backup = path.resolve(fileName + "." + extension);
+
+    try {
+      Files.deleteIfExists(backup);
+      Files.copy(commentedFileConfig, backup);
+    } catch (IOException exception) {
+      SpectreConstants.LOG.warn(CONFIG, "Failed to create backup file for {}", commentedFileConfig,
+          exception);
     }
   }
 
